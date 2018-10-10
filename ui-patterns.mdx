@@ -1,0 +1,126 @@
+import { Appear } from 'mdx-deck'
+
+export { yellow as theme } from 'mdx-deck/themes'
+
+# Advanced UI Patterns
+![](front-end.jpeg)
+---
+# Problématique
+### Comment partager un comportement commun entre plusieurs composants ?
+---
+### Quelques solutions
+<ul>
+  <Appear>
+    <li>Pour les plus anciens : les mixins ! Obsolète, non supportés</li>
+    <li>Fonction 'utils' :
+        <ul>
+            <li>Parfois pratique pour des besoins simples</li>
+            <li>Ne permet pas de partager des states ou lifecycle communs</li>
+        </ul>
+    </li>
+    <li>High Order Component :
+        <ul>
+            <li>Permet de "surcharger" un composant</li>
+            <li>Répond au besoin de partage de state et lifecycle</li>
+            <li>Peut vite devenir complexe : containers multiple, à qui appartient tel ou tel state, collision de nom...</li>
+            <li>export default connect(mapStateToProps, {})(withCookies(withRouter(LangSelector)));</li>
+        </ul>
+    </li>
+  </Appear>
+</ul>
+---
+### Introduction aux Render Props
+#### Nom donné à une prop qui se charge d'effectuer le render de son composant
+
+```jsx
+<MonComposant
+    renderProp = {data => <div>Super Rendu de {data}</div>}
+/>
+...
+MonComposant.js
+render() {
+    this.props.renderProp(this.state.data);
+}
+```
+---
+### Children as render prop
+Pour un composant React, children est aussi une prop !
+
+On peut donc faire la même chose, dans une syntaxe plus agréable
+
+```jsx
+<MonComposant>
+    {data => <div>Super Rendu de {data}</div>}
+</MonComposant>
+...
+MonComposant.js
+render() {
+    this.props.children(this.state.data);
+}
+```
+---
+import { CodeSurfer } from "mdx-deck-code-surfer"
+
+<CodeSurfer
+  title="Example Simple: AsyncLoader"
+  code={require("!raw-loader!./AsyncLoader.js")}
+  lang="javascript"
+  showNumbers={false}
+  dark={false}
+  steps={[
+    { notes: "Permet d'enrichir un composant en lui permettant de charger des données via REST"},
+    { lines: [1], notes: "Composant React ordinaire"},
+    { range: [4, 7], notes: "Gère son propre state..." },
+    { range: [27, 35], notes: "... et son propre lifecycle" },
+    { range: [10, 25], notes: "Récupère les données et met à jour son state" },
+    { range: [37, 40], notes: "A chaque changement de state : descend les données à notre composant via une render prop" },
+  ]}
+/>
+---
+### Utilisation dans MonComposant
+```jsx
+render() {
+    <div>
+        Mon super composant et son state : {this.state.data}
+        <AsyncLoader url='https://monservice.com/endpoint'>
+        {
+            ({isLoading, data, error}) => (
+            <div>
+                Mes supers données : {data}
+            </div>
+            )
+        }
+        </AsyncLoader>
+    </div>
+}
+```
+---
+### Une autre utilisation : Composant Headless
+#### Besoin d'un composant qui pourra avoir des rendus radicalement différent, mais un comportement similaire
+
+![](mileage1.png)
+![](mileage2.png)
+---
+### Show some code !
+![](coding.jpg)
+---
+### Bonus pour la fin : UI Slots
+```jsx
+const {user} = this.props;
+<Panel
+    top={<MonHeader name={user.name} />}
+    left={<StatBar user={user.stats} />}
+    right={<SuperContent />}
+/>
+...
+const Panel = (props) => (
+<div>
+    <div class='top'>{this.props.top}</div>
+    <div class='left'>{this.props.left}</div>
+    <div class='right'>{this.props.right}</div>
+</div>
+)
+```
+---
+### Des questions ?
+![](wtf.jpeg)
